@@ -10,7 +10,7 @@ import { handleZodError } from "./middlewares/handleZodError.middleware";
 import { handlePrismaError } from "./middlewares/handlePrismaError.middleware";
 import { handleCommonError } from "./middlewares/handleCommonError.middleware";
 
-import todoRoute from "./routes/todo.route";
+import todoRoute from "./routes/metricas.route";
 
 dotenv.config();
 

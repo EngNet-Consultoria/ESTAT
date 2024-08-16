@@ -6,7 +6,7 @@ USE ESTAT_HOTEIS;
 
 -- Criação da tabela
 CREATE TABLE METRICAS (
-    id VARCHAR(50) PRIMARY KEY, -- ID cliente
+    id VARCHAR(50) PRIMARY KEY,
     ticket_diaria DECIMAL(10, 2),
     ticket_medio DECIMAL(10, 2),
     receita_com_taxas DECIMAL(10, 2),
@@ -19,8 +19,11 @@ CREATE TABLE METRICAS (
     tipo_reserva VARCHAR(50),
     agente VARCHAR(50),
     canais VARCHAR(255),
-    criacoes INT,
+    data_dia_criacao int,
+    data_mes_criacao varchar(50),
+    data_ano_criacao int,
+    criacoes BOOLEAN,
     siglas_condominios VARCHAR(50),
     localidade VARCHAR(255),
-    imovel VARCHAR(255)
+    imovel VARCHAR(255),
 );
