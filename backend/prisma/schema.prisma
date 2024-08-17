@@ -1,31 +1,33 @@
-generator client {
-  provider = "prisma-client-js"
-}
+// prisma/schema.prisma
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model Metricas {
-  id                 String  @id @db.VarChar(50)
-  ticket_diaria      Decimal @db.Decimal(10, 2)
-  ticket_medio       Decimal @db.Decimal(10, 2)
-  receita_com_taxas  Decimal @db.Decimal(10, 2)
-  reservas           Int
-  nota               Decimal @db.Decimal(3, 2)
-  data_dia           Int
-  data_mes           Int
-  nome_mes           String  @db.VarChar(20)
-  data_ano           Int
-  tipo_reserva       String  @db.VarChar(50)
-  agente             String  @db.VarChar(50)
-  canais             String  @db.VarChar(255)
-  data_dia_criacao   Int
-  data_mes_criacao   String  @db.VarChar(50)
-  data_ano_criacao   Int
-  criacoes           Boolean
-  siglas_condominios String  @db.VarChar(50)
-  localidade         String  @db.VarChar(255)
-  imovel             String  @db.VarChar(255)
+  id                   String   @id
+  ticket_diaria        Float
+  receita_com_taxas    Float
+  nota                 Float
+  data_dia             Int
+  data_mes             Int
+  nome_mes             String
+  data_ano             Int
+  id_agente            String
+  nome_agente          String
+  canais               String
+  data_dia_criacao     Int
+  data_mes_criacao     String
+  data_ano_criacao     Int
+  siglas_condominios   String
+  estado               String
+  cidade               String
+  regiao               String
+  rua_numero           String
+  imovel               String
 }
