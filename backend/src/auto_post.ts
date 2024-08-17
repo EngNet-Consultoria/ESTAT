@@ -37,6 +37,29 @@ interface FetchDataUsingListingIdParams {
   idListing: string;
 }
 
+// Corrigido: Adicionado tipo string para os parâmetros
+function calcularDiasEntreDatas(data1: string, data2: string): number {
+    const dataInicial = new Date(data1);
+    const dataFinal = new Date(data2);
+  
+    if (isNaN(dataInicial.getTime()) || isNaN(dataFinal.getTime())) {
+      console.error('Uma das datas fornecidas é inválida.');
+      return 0; // Retorna 0 para evitar divisão por zero
+    }
+  
+    const diferencaEmMilissegundos = dataFinal.getTime() - dataInicial.getTime();
+  
+    if (diferencaEmMilissegundos <= 0) {
+      console.error('A data final é anterior ou igual à data inicial.');
+      return 0; // Retorna 0 para evitar divisão por zero
+    }
+  
+    const umDiaEmMilissegundos = 1000 * 60 * 60 * 24;
+    const diferencaEmDias = Math.floor(diferencaEmMilissegundos / umDiaEmMilissegundos);
+  
+    return diferencaEmDias;
+}
+
 // Função para buscar dados da API de listagem usando o id_listing
 async function fetchDataUsingListingId({ idListing }: FetchDataUsingListingIdParams) {
   try {
@@ -61,42 +84,53 @@ interface ProcessReservationDataParams {
 
 // Função para processar dados da reserva
 function processReservationData({ reserva, listagemData }: ProcessReservationDataParams) {
-  // Transforme os dados da reserva e da listagem conforme necessário
-  const processedData: Metricas = {
-    id: reserva.id, // ID da reserva
-    ticket_diaria: reserva.price._f_expected, // Ticket diário
-    receita_com_taxas: reserva.price._f_total, // Receita com taxas
-    nota: 0 , // Nota (total pago)
-    data_dia: new Date(reserva.checkInDate).getDate(), // Dia de check-in
-    data_mes: new Date(reserva.checkInDate).getMonth() + 1, // Mês de check-in
-    nome_mes: new Date(reserva.checkInDate).toLocaleString('default', { month: 'long' }), // Nome do mês
-    data_ano: new Date(reserva.checkInDate).getFullYear(), // Ano de check-in
-    id_agente: reserva.agent._id, // ID do agente
-    nome_agente: reserva.agent.name, // Nome do agente
-    canais: reserva.partner.name, // Canais (nome do parceiro)
-    data_dia_criacao: new Date(reserva.creationDate).getDate(), // Dia de criação
-    data_mes_criacao: (new Date(reserva.creationDate).getMonth() + 1).toString(), // Mês de criação (como string)
-    data_ano_criacao: new Date(reserva.creationDate).getFullYear(), // Ano de criação (como string)
-    siglas_condominios: listagemData.siglas_condominios || '', // Siglas dos condomínios (ajustar conforme necessário)
-    estado: listagemData.estado || '', // Estado
-    cidade: listagemData.cidade || '', // Cidade
-    regiao: listagemData.regiao || '', // Região
-    rua_numero: listagemData.rua_numero || '', // Rua e número
-    imovel: listagemData.imovel || '', // Imóvel
-  };
-
-  // Valida os dados usando o esquema zod
-  try {
-    MetricasSchema.parse(processedData);
-  } catch (validationError) {
-    console.error('Erro na validação dos dados:', validationError);
-    return; // Interrompe o processamento se os dados não forem válidos
+    if (!reserva || !listagemData) {
+      console.error('Dados da reserva ou da listagem estão indefinidos.');
+      return;
+    }
+  
+    const diasEntreDatas = calcularDiasEntreDatas(reserva.checkInDate, reserva.checkOutDate);
+    console.log(`Dias entre datas: ${diasEntreDatas}`); // Log de depuração
+  
+    const total = reserva.price._f_total;
+    console.log(`Total da reserva: ${total}`); // Log de depuração
+  
+    const ticketDiario = diasEntreDatas > 0 ? Math.floor(total / diasEntreDatas) : 0;
+    console.log(`Ticket diário calculado: ${ticketDiario}`); // Log de depuração
+  
+    const processedData: Metricas = {
+      id: reserva.id || '', // ID da reserva
+      ticket_diaria: ticketDiario || 0, // Ticket diário
+      receita_com_taxas: reserva.price?._f_total || 0, // Receita com taxas
+      nota: 0, // Nota (total pago)
+      data_dia: reserva.checkInDate ? new Date(reserva.checkInDate).getDate() : 0, // Dia de check-in
+      data_mes: reserva.checkInDate ? new Date(reserva.checkInDate).getMonth() + 1 : 0, // Mês de check-in
+      nome_mes: reserva.checkInDate ? new Date(reserva.checkInDate).toLocaleString('default', { month: 'long' }) : '', // Nome do mês
+      data_ano: reserva.checkInDate ? new Date(reserva.checkInDate).getFullYear() : 0, // Ano de check-in
+      id_agente: reserva.agent?._id || '', // ID do agente
+      nome_agente: reserva.agent?.name || '', // Nome do agente
+      canais: reserva.partner?.name || '', // Canais (nome do parceiro)
+      data_dia_criacao: reserva.creationDate ? new Date(reserva.creationDate).getDate() : 0, // Dia de criação
+      data_mes_criacao: reserva.creationDate ? (new Date(reserva.creationDate).getMonth() + 1).toString() : '', // Mês de criação (como string)
+      data_ano_criacao: reserva.creationDate ? new Date(reserva.creationDate).getFullYear() : 0, // Ano de criação (como string)
+      siglas_condominios: listagemData.siglas_condominios || '', // Siglas dos condomínios (ajustar conforme necessário)
+      estado: listagemData.estado || '', // Estado
+      cidade: listagemData.cidade || '', // Cidade
+      regiao: listagemData.regiao || '', // Região
+      rua_numero: listagemData.rua_numero || '', // Rua e número
+      imovel: listagemData.imovel || '', // Imóvel
+    };
+  
+    try {
+      MetricasSchema.parse(processedData);
+    } catch (validationError) {
+      console.error('Erro na validação dos dados:', validationError);
+      return; // Interrompe o processamento se os dados não forem válidos
+    }
+  
+    storeDataInDatabase({ data: processedData });
   }
-
-  // Armazena os dados no banco de dados
-  storeDataInDatabase({ data: processedData });
-}
-
+  
 // Tipos para o parâmetro da função
 interface StoreDataInDatabaseParams {
   data: Metricas; // Ajustado para usar o tipo correto
@@ -129,7 +163,6 @@ async function fetchAndProcessData() {
 
       console.log(`Buscando dados de reservas de ${today} com skip ${skip} e limit ${limit}`);
 
-      // Buscar dados da API de reservas
       const reservasData = await fetchDataReservas({
         fromDate: '2020-02-29',
         toDate: today, // `today` é garantidamente uma string
@@ -148,7 +181,6 @@ async function fetchAndProcessData() {
         if (idListing) {
           console.log(`Buscando dados da listagem para idListing ${idListing}`);
           
-          // Buscar dados da API de listagem
           const listagemData = await fetchDataUsingListingId({ idListing });
           console.log(`Processando reserva ${reserva.id}`);
 

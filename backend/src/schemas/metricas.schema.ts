@@ -3,7 +3,7 @@ import { z } from "zod";
 // Schemas
 export const MetricasSchema = z.object({
   id: z.string().max(50),                      // ID da reserva
-  ticket_diaria: z.number().positive(),        // Valor da diária por imóvel
+  ticket_diaria: z.number(),        // Valor da diária por imóvel
   receita_com_taxas: z.number().positive(),    // Receita total incluindo taxas
   nota: z.number().min(0).max(10),             // Nota média (avaliação), assumindo escala de 0 a 10
   data_dia: z.number().int().min(1).max(31),   // Dia da reserva (1 a 31)
