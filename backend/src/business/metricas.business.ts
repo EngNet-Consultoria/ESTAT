@@ -16,6 +16,8 @@ export const createMetricas = async (data: {
   id: string;
   ticket_diaria: number;
   receita_com_taxas: number;
+  taxas: number; 
+  comissao: number; 
   reservas: number;
   nota: number;
   data_dia: number;
@@ -45,6 +47,8 @@ export const updateMetricas = async (id: string, data: {
   receita_com_taxas?: number;
   reservas?: number;
   nota?: number;
+  taxas?: number;  
+  comissao?: number; 
   data_dia?: number;
   data_mes?: number;
   nome_mes?: string;

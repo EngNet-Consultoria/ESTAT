@@ -9,6 +9,8 @@ CREATE TABLE METRICAS (
     id VARCHAR(50) PRIMARY KEY, --reservation
     ticket_diaria DECIMAL(10, 2), -- reservation
     receita_com_taxas DECIMAL(10, 2), --reservation
+    taxas DECIMAL(10, 2),
+    comissao DECIMAL(10, 2),
     nota DECIMAL(3, 2), --reservation
     data_dia INT, -- reservation
     data_mes INT, --reservation

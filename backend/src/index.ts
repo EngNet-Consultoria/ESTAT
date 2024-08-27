@@ -31,5 +31,5 @@ const PORT = process.env.PORT ?? 8080;
 
 app.listen(PORT, async () => {
   await prisma.$connect();
-  console.log(`Server started on http://localhost:${PORT}`);
+  console.log(`Servidor rodando: http://localhost:${PORT}`);
 });
