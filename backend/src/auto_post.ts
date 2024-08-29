@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import { MetricasSchema, Metricas } from './schemas/metricas.schema';
 import { number } from 'zod';
 import { skipPartiallyEmittedExpressions } from 'typescript';
+import { max } from 'date-fns';
+
 
 const prisma = new PrismaClient();
 const AUTH_HEADER = 'Basic ZDE1YjBkYWM6ZTA2NjgyODY=';
@@ -168,10 +170,14 @@ async function fetchAndProcessData() {
     const limit = 100;
     const maxItems = 100;
     let processedItems = 0;
-    const today = new Date().toISOString().split('T')[0] || '';
 
-    while (processedItems < maxItems) {
-      console.log(`Buscando dados de reservas até ${today} com skip ${skip} e limit ${limit}`);
+    const today = new Date().toISOString().split('T')[0] || '';
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = yesterdayDate.toISOString().split('T')[0] || '';
+
+    while (processedItems > -1) {
+      console.log(`Buscando dados de reservas de ${yesterday} até ${today} com skip ${skip} e limit ${limit}`);
 
       const reservasData = await fetchDataReservas({
         fromDate: '2017-01-01',
@@ -189,35 +195,36 @@ async function fetchAndProcessData() {
         try {
           const idListing = reserva._idlisting;
           if (!idListing) {
-            return null; // Se não houver idListing, retorne null ou outro valor padrão
+            return null;
           }
-      
+
           console.log(`Buscando dados da listagem para idListing ${idListing}`);
           const listagemData = await fetchDataUsingListingId({ idListing });
-      
+
           if (listagemData._idproperty) {
             console.log(`Buscando dados da idPropriedade ${listagemData._idproperty}`);
             const propriedadeData = await fetchDataUsingPropriedadeId({ idPropriedade: listagemData._idproperty });
-      
+
             // Processa os dados da reserva, listagem e propriedade
             processReservationData({ reserva, listagemData, propriedadeData });
           }
-      
-          return listagemData; // Retorne o resultado após o processamento
+
+          return listagemData;
         } catch (error) {
           console.error('Erro ao processar reserva:', error);
-          return null; // Retorne null em caso de erro
+          return null;
         }
       });
-      
 
       await Promise.all(listagemPromises);
 
       processedItems += reservasData.length;
       skip += limit;
     }
-
+    
     console.log('Processamento finalizado.');
+    
+   
   } catch (error) {
     console.error('Erro durante o processamento de dados:', error);
   } finally {
@@ -225,6 +232,16 @@ async function fetchAndProcessData() {
   }
 }
 
-fetchAndProcessData().catch((error) => {
+
+/*fetchAndProcessData().catch((error) => {
   console.error('Erro não tratado na execução da função principal:', error);
-});
+  
+})*/
+
+
+setInterval(() => {
+  console.log('Executando fetchAndProcessData no intervalo de 1 minutos...');
+  fetchAndProcessData().catch((error) => {
+    console.error('Erro não tratado na execução da função principal:', error);
+  });
+}, 60000);
