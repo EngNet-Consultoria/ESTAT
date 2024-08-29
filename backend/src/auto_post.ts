@@ -180,7 +180,7 @@ async function fetchAndProcessData() {
       console.log(`Buscando dados de reservas de ${yesterday} até ${today} com skip ${skip} e limit ${limit}`);
 
       const reservasData = await fetchDataReservas({
-        fromDate: '2017-01-01',
+        fromDate: yesterday, //'2017-01-01',
         toDate: today,
         skip,
         limit,
