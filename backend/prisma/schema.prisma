@@ -33,3 +33,4 @@ model Metricas {
   rua_numero           String
   imovel               String
 }
+

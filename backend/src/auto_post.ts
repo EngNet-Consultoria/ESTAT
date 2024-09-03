@@ -180,7 +180,7 @@ async function fetchAndProcessData() {
       console.log(`Buscando dados de reservas de ${yesterday} até ${today} com skip ${skip} e limit ${limit}`);
 
       const reservasData = await fetchDataReservas({
-        fromDate: yesterday, //'2017-01-01',
+        fromDate: '2017-01-01',
         toDate: today,
         skip,
         limit,
@@ -233,15 +233,15 @@ async function fetchAndProcessData() {
 }
 
 
-/*fetchAndProcessData().catch((error) => {
+fetchAndProcessData().catch((error) => {
   console.error('Erro não tratado na execução da função principal:', error);
   
-})*/
+})
 
 
-setInterval(() => {
+/*setInterval(() => {
   console.log('Executando fetchAndProcessData no intervalo de 1 minutos...');
   fetchAndProcessData().catch((error) => {
     console.error('Erro não tratado na execução da função principal:', error);
   });
-}, 60000);
+}, 60000);*/
