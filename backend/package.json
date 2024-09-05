@@ -7,8 +7,10 @@
     "dev": "nodemon --exec ts-node-dev src/index.ts --watch src --ext ts,js",
     "dev:no-watch": "ts-node src/index.ts",
     "build": "rimraf dist && tsc",
-    "start": "npm run build && node dist/index.js",
-    "automacao": "ts-node-dev src/auto_post.ts"
+    "start": "concurrently \"npm run backend\" \"npm run automacao\"",
+    "backend": "ts-node-dev src/index.ts",
+    "automacao": "ts-node-dev src/auto_post.ts",
+    "restart": "nodemon --exec \"node dist/index.js\" --signal SIGHUP"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",
