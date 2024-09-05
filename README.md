@@ -36,7 +36,10 @@ Este projeto foi desenvolvido para armazenar e atualizar dados provenientes da A
      ```
      npx prisma migrate dev --init
      ```
-   - Isso criará as tabelas necessárias no banco de dados que você configurou.
+
+   - Ou opie e cole o codigo databse/hoteis.sql no terminal confirgurado com o mysql.
+
+   - Isso criará as tabelas necessárias no banco de dados.
 
 ## Como Executar o Projeto
 
@@ -45,7 +48,7 @@ Este projeto foi desenvolvido para armazenar e atualizar dados provenientes da A
    - No terminal, ainda na pasta do projeto, execute o comando:
      
      ```
-     node start
+     npm start
      ```
    - Isso iniciará o servidor que estará disponível em seu navegador na seguinte URL: [http://localhost:3001](http://localhost:3001).
 
