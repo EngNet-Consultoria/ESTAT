@@ -10,7 +10,7 @@ import { handleZodError } from "./middlewares/handleZodError.middleware";
 import { handlePrismaError } from "./middlewares/handlePrismaError.middleware";
 import { handleCommonError } from "./middlewares/handleCommonError.middleware";
 
-import todoRoute from "./routes/todo.route";
+import metricas from "./routes/metricas.route";
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ app.use(cors());
 app.use(helmet());
 
 // Include your routes here
-app.use("/todo", todoRoute);
+app.use("/metricas", metricas);
 
 app.use(handleZodError);
 app.use(handlePrismaError);
@@ -31,5 +31,5 @@ const PORT = process.env.PORT ?? 8080;
 
 app.listen(PORT, async () => {
   await prisma.$connect();
-  console.log(`Server started on http://localhost:${PORT}`);
+  console.log(`Servidor rodando: http://localhost:${PORT}`);
 });

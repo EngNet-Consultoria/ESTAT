@@ -1,17 +1,36 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider = "prisma-client-js"
-}
+// prisma/schema.prisma
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-
-model Todo {
-  id    Int    @id @default(autoincrement()) @db.UnsignedInt
-  title String @db.VarChar(50)
+generator client {
+  provider = "prisma-client-js"
 }
+
+model Metricas {
+  id                   String   @id
+  ticket_diaria        Float
+  receita_com_taxas    Float
+  taxas                Float
+  comissao             Float
+  nota                 Float
+  data_dia             Int
+  data_mes             Int
+  nome_mes             String
+  data_ano             Int
+  id_agente            String
+  nome_agente          String
+  canais               String
+  data_dia_criacao     Int
+  data_mes_criacao     String
+  data_ano_criacao     Int
+  siglas_condominios   String
+  estado               String
+  cidade               String
+  regiao               String
+  rua_numero           String
+  imovel               String
+}
+
