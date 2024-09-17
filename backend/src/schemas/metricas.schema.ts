@@ -6,8 +6,7 @@ export const MetricasSchema = z.object({
   ticket_diaria: z.number(),        // Valor da diária por imóvel
   receita_com_taxas: z.number(),    // Receita total incluindo taxas
   taxas: z.number(), 
-  comissao: z.number(), 
-  nota: z.number().min(0).max(10),             // Nota média (avaliação), assumindo escala de 0 a 10
+  comissao: z.number(),            
   data_dia: z.number().int().min(1).max(31),   // Dia da reserva (1 a 31)
   data_mes: z.number().int().min(1).max(12),   // Mês da reserva (1 a 12)
   nome_mes: z.string().max(20),                // Nome do mês

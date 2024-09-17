@@ -122,7 +122,6 @@ if (propriedadeData.address && propriedadeData.address.street) {
     receita_com_taxas: reserva.price?._f_total,
     taxas: taxas, 
     comissao: reserva.partner?.commission?._mcval?.BRL||0,
-    nota: 0,
     data_dia: reserva.checkInDate ? new Date(reserva.checkInDate).getDate() : 0,
     data_mes: reserva.checkInDate ? new Date(reserva.checkInDate).getMonth() + 1 : 0,
     nome_mes: reserva.checkInDate ? new Date(reserva.checkInDate).toLocaleString('default', { month: 'long' }) : '',
@@ -186,7 +185,7 @@ async function fetchAndProcessData() {
         limit,
       });
 
-      if (reservasData.length === 0 || reservasData.length < limit) {
+      if (reservasData.length === 0 ) {
         console.log('Nenhum dado de reservas encontrado ou todos os dados foram processados. Finalizando.');
         break;
       }
