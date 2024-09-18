@@ -62,6 +62,41 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// Atualizar a nota de várias métricas pelo ID
+router.put("/nota", async (req, res) => {
+  try {
+    const metricasToUpdate = req.body; // O corpo da requisição deve ser um array de objetos com id e nota
+
+    if (!Array.isArray(metricasToUpdate)) {
+      return res.status(400).json({ message: "O corpo da requisição deve ser um array de objetos com 'id' e 'nota'." });
+    }
+
+    const updatedMetricas = [];
+
+    for (const { id, nota } of metricasToUpdate) {
+      if (!id || typeof nota !== 'number') {
+        return res.status(400).json({ message: "Cada objeto deve conter 'id' e 'nota' válidos." });
+      }
+
+      const updated = await updateMetricas(id, { nota });
+
+      if (updated) {
+        updatedMetricas.push(updated);
+      } else {
+        return res.status(404).json({ message: `Métrica com id ${id} não encontrada.` });
+      }
+    }
+
+    return res.status(200).json(updatedMetricas);
+
+  } catch (error) {
+    return res.status(500).json({ message: "Erro ao atualizar as métricas." });
+  }
+});
+
+
+
+
 // Delete a metric by ID
 router.delete("/:id", async (req, res) => {
   try {

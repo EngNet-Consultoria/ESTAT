@@ -11,6 +11,7 @@ CREATE TABLE METRICAS (
     receita_com_taxas DECIMAL(10, 2),
     taxas DECIMAL(10, 2),
     comissao DECIMAL(10, 2),
+    nota DECIMAL(3, 2),
     data_dia INT,
     data_mes INT,
     nome_mes VARCHAR(20),

@@ -15,6 +15,7 @@ model Metricas {
   receita_com_taxas    Float
   taxas                Float
   comissao             Float
+  nota                 Float
   data_dia             Int
   data_mes             Int
   nome_mes             String
