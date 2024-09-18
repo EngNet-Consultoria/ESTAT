@@ -1,152 +1,159 @@
-- `POST /api/motorista/`
-
-  - Entrada: Dados do motorista
-    ```json
-    {
-      "cpf": "00000000000",
-      "nome": "Fulano",
-      "vencimento_cnh": "2025-12-15",
-      "categoria_cnh": "A"
-    }
-    ```
-  - Saída: (nenhuma)
-
-- `POST /api/carro/`
-
-  - Entrada: Dados do carro
-    ```json
-    {
-      "placa": "ABC-1AVD",
-      "marca": "Ford",
-      "modelo": "Focus",
-      "ano": 2015,
-      "cor": "Azul",
-      "cpf_motorista": "00000000000"
-    }
-    ```
-  - Saída: (nenhuma)
-
-- `POST /api/multa/`
-
-  - Entrada: Dados da multa
-    ```json
-    {
-      "valor": 293.47,
-      "data": "2020-01-01",
-      "pontos": 4,
-      "tipo": "Velocidade acima da máxima permitida",
-      "placa_carro": "ABC-1AVD"
-    }
-    ```
-  - Saída: (nenhuma)
-
-- `GET /api/motorista/ `
-
+- `GET /metricas/`
+  
   - Entrada: (nenhuma)
-  - Saída: Lista de motoristas
-
+  - Saída:
+    
     ```json
     [
-      {
-        "cpf": "00000000000",
-        "nome": "Fulano",
-        "vencimento_cnh": "2025-12-15",
-        "categoria_cnh": "A"
-      },
-      {
-        "cpf": "11111111111",
-        "nome": "Conceição",
-        "vencimento_cnh": "2023-11-14",
-        "categoria_cnh": "B"
-      },
-      {
-        "cpf": "22222222222",
-        "nome": "Joãozinho",
-        "vencimento_cnh": "2027-07-16",
-        "categoria_cnh": "AB"
-      }
+        {
+          "id": "MZ05I",
+          "ticket_diaria": 227,
+          "receita_com_taxas": 454.0,
+          "taxas": 148.00,
+          "comissao": 61.20,
+          "nota": -1,
+          "data_dia": 24,
+          "data_mes": 9,
+          "nome_mes": "setembro"
+          "data_ano": 2024
+          "id_agente": "65e9a7cca79a4524a5dd7373",
+          "nome_agente": "Stella Nascimento",
+          "canais": "Website",
+          "data_dia_criacao": 31,
+          "data_mes_criacao": "agosto",
+          "data_ano_criacao": 2024,
+          "siglas_condominios": "01. Beach Way",
+          "estado": "Pernambuco",
+          "cidade": "Tamandaré",
+          "regiao": "Praia Dos Carneiros",
+          "rua_numero": "11",
+          "imovel": "Beach Way - Praia dos Carneiros"
+        },
+        {
+        ...
+        }
     ]
     ```
 
-- `GET /api/carro/<cpf_motorista>`
-
-  - Entrada: CPF do motorista
-  - Saída: Lista de carros do motorista
-
-    ```json
-    [
-      {
-        "placa": "ABC-1AVD",
-        "marca": "Ford",
-        "modelo": "Focus",
-        "ano": 2015,
-        "cor": "Azul"
-      },
-      {
-        "placa": "ASD-6D84",
-        "marca": "Chevrolet",
-        "modelo": "Prisma",
-        "ano": 2018,
-        "cor": "Prata"
-      },
-      {
-        "placa": "HFD-7A89",
-        "marca": "Honda",
-        "modelo": "Fit",
-        "ano": 2012,
-        "cor": "Vermelho"
-      }
-    ]
-    ```
-
-- `GET /api/multa/<cpf_motorista>`
-
-  - Entrada: CPF do motorista
-  - Saída: Lista de multas do motorista
-
-    ```json
-    [
-      {
-        "valor": 293.47,
-        "data": "2020-01-01",
-        "pontos": 4,
-        "tipo": "Velocidade acima da máxima permitida"
-      },
-      {
-        "valor": 293.47,
-        "data": "2020-01-01",
-        "pontos": 4,
-        "tipo": "Velocidade acima da máxima permitida"
-      },
-      {
-        "valor": 723.23,
-        "data": "2020-01-01",
-        "pontos": 7,
-        "tipo": "Dirigir utilizando o celular"
-      },
-      {
-        "valor": 1467.35,
-        "data": "2020-01-01",
-        "pontos": 12,
-        "tipo": "Dirigir sob efeito de álcool"
-      }
-    ]
-    ```
-
-- `GET /api/multa/retidos`
-
+- `GET /metricas/:id`
+  
   - Entrada: (nenhuma)
-  - Saída: Lista de motoristas com 10 pontos ou mais
+  - Saída: (nenhuma)
+    
+    ```json
+     {
+        "id": "MZ05I",
+        "ticket_diaria": 227,
+        "receita_com_taxas": 454.0,
+        "taxas": 148.00,
+        "comissao": 61.20,
+        "nota": -1,
+        "data_dia": 24,
+        "data_mes": 9,
+        "nome_mes": "setembro"
+        "data_ano": 2024
+        "id_agente": "65e9a7cca79a4524a5dd7373",
+        "nome_agente": "Stella Nascimento",
+        "canais": "Website",
+        "data_dia_criacao": 31,
+        "data_mes_criacao": "agosto",
+        "data_ano_criacao": 2024,
+        "siglas_condominios": "01. Beach Way",
+        "estado": "Pernambuco",
+        "cidade": "Tamandaré",
+        "regiao": "Praia Dos Carneiros",
+        "rua_numero": "11",
+        "imovel": "Beach Way - Praia dos Carneiros"
+    }
+    ```
 
+- `POST /metricas/`
+  
+  - Entrada: Dados da métrica
+    
+    ```json
+    {
+        "id": "MZ05I",
+        "ticket_diaria": 227,
+        "receita_com_taxas": 454.0,
+        "taxas": 148.00,
+        "comissao": 61.20,
+        "nota": -1,
+        "data_dia": 24,
+        "data_mes": 9,
+        "nome_mes": "setembro"
+        "data_ano": 2024
+        "id_agente": "65e9a7cca79a4524a5dd7373",
+        "nome_agente": "Stella Nascimento",
+        "canais": "Website",
+        "data_dia_criacao": 31,
+        "data_mes_criacao": "agosto",
+        "data_ano_criacao": 2024,
+        "siglas_condominios": "01. Beach Way",
+        "estado": "Pernambuco",
+        "cidade": "Tamandaré",
+        "regiao": "Praia Dos Carneiros",
+        "rua_numero": "11",
+        "imovel": "Beach Way - Praia dos Carneiros"
+    }
+    ```
+  - Saída: (nenhuma)
+
+- `PUT /metricas/:id `
+  
+  - Entrada:  Dados atualizados
+    
+    ```json
+    {
+        "id": "MZ05I",
+        "ticket_diaria": 227,
+        "receita_com_taxas": 454.0,
+        "taxas": 148.00,
+        "comissao": 61.20,
+        "nota": -1,
+        "data_dia": 24,
+        "data_mes": 9,
+        "nome_mes": "setembro"
+        "data_ano": 2024
+        "id_agente": "65e9a7cca79a4524a5dd7373",
+        "nome_agente": "Stella Nascimento",
+        "canais": "Website",
+        "data_dia_criacao": 31,
+        "data_mes_criacao": "agosto",
+        "data_ano_criacao": 2024,
+        "siglas_condominios": "01. Beach Way",
+        "estado": "Pernambuco",
+        "cidade": "Tamandaré",
+        "regiao": "Praia Dos Carneiros",
+        "rua_numero": "11",
+        "imovel": "Beach Way - Praia dos Carneiros"
+    }
+    ```
+  
+  - Saída: (nenhuma)
+
+- `DELETE /metricas/:id`
+  
+  - Entrada: (nenhuma)
+  
+  - Saída: (nenhuma)
+
+- `PUT /nota/`
+  
+  - Entrada: Id e valor da nota
+    
     ```json
     [
-      {
-        "nome": "Fulano",
-        "pontos": 12
-      },
-      {
-        "nome": "Conceição",
-        "pontos": 11
-      }
+        {
+            "id": "MZ05I",
+            "nota": 5
+        },
+        {
+            "id": "MY10I",
+            "nota": 4
+        }
     ]
     ```
+  
+  - Saída: (nenhuma)
+
