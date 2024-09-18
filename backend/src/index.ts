@@ -11,6 +11,7 @@ import { handlePrismaError } from "./middlewares/handlePrismaError.middleware";
 import { handleCommonError } from "./middlewares/handleCommonError.middleware";
 
 import metricas from "./routes/metricas.route";
+import notas from "./routes/notas.route"
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(helmet());
 
 // Include your routes here
 app.use("/metricas", metricas);
+app.use("/nota", notas);
 
 app.use(handleZodError);
 app.use(handlePrismaError);
