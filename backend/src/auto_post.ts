@@ -188,7 +188,7 @@ async function fetchAndProcessData() {
         limit,
       });
 
-      if (reservasData.length === 0 ) {
+      if (reservasData.length === 0 || reservasData<limit) {
         console.log('Nenhum dado de reservas encontrado ou todos os dados foram processados. Finalizando.');
         break;
       }
