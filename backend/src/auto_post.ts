@@ -174,6 +174,13 @@ async function fetchAndProcessData() {
     let processedItems = 0;
 
     const today = new Date().toISOString().split('T')[0] || '';
+
+    const date = new Date(today); // Converte a string para um objeto Date
+
+    date.setFullYear(date.getFullYear() + 1); // Adiciona um ano à data
+    
+    const nextYearDate = date.toISOString().split('T')[0]|| ''; // Formata como string YYYY-MM-DD
+
     const yesterdayDate = new Date();
     yesterdayDate.setDate(yesterdayDate.getDate() - 1);
     const yesterday = yesterdayDate.toISOString().split('T')[0] || '';
@@ -182,13 +189,13 @@ async function fetchAndProcessData() {
       console.log(`Buscando dados de reservas de ${yesterday} até ${today} com skip ${skip} e limit ${limit}`);
 
       const reservasData = await fetchDataReservas({
-        fromDate: '2017-01-01',
-        toDate: today,
+        fromDate: "2017-01-01",
+        toDate: nextYearDate,
         skip,
         limit,
       });
 
-      if (reservasData.length === 0 || reservasData.length<limit) {
+      if (reservasData.length === 0) {
         console.log('Nenhum dado de reservas encontrado ou todos os dados foram processados. Finalizando.');
         break;
       }
