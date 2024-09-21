@@ -4,12 +4,14 @@ import { MetricasSchema, Metricas } from './schemas/metricas.schema';
 import { number } from 'zod';
 import { skipPartiallyEmittedExpressions } from 'typescript';
 import { max, nextSunday } from 'date-fns';
+import { NUMBER } from 'sequelize';
 
 
 const prisma = new PrismaClient();
 const AUTH_HEADER = 'Basic ZDE1YjBkYWM6ZTA2NjgyODY=';
 const API_LISTAGEM = 'https://cta.stays.com.br/external/v1/content/listings';
 const API_PROPRIETARIO = 'https://cta.stays.com.br/external/v1/content/properties';
+const API_CLIENT = "https://cta.stays.com.br/external/v1/booking/clients"; 
 
 interface FetchDataReservasParams {
   fromDate: string;
@@ -85,13 +87,34 @@ function calcularDiasEntreDatas(data1: string, data2: string): number {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
+interface FetchDataUsingClientParams {
+  id_client: string;
+}
+
+async function fetchDataUsingClientID({ id_client }: FetchDataUsingClientParams) {
+  try {
+    const response = await axios.get(`${API_CLIENT}/${id_client}`, {
+      headers: {
+        accept: 'application/json',
+        Authorization: AUTH_HEADER,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao buscar dados do cliente com ID ${id_client}:`, error.response?.data || error.message);
+    throw error; // Lança o erro para ser tratado onde a função é chamada
+  }
+}
+
+
 interface ProcessReservationDataParams {
   reserva: any;
   listagemData: any;
   propriedadeData: any;
+  clienteData: any; 
 }
 
-function processReservationData({ reserva, listagemData, propriedadeData }: ProcessReservationDataParams) {
+function processReservationData({ reserva, listagemData, propriedadeData, clienteData}: ProcessReservationDataParams) {
   if (!reserva || !listagemData || !propriedadeData) {
     console.error('Dados da reserva, listagem ou propriedade estão indefinidos.');
     return;
@@ -129,6 +152,11 @@ if (propriedadeData.address && propriedadeData.address.street) {
     data_mes: reserva.checkInDate ? new Date(reserva.checkInDate).getMonth() + 1 : 0,
     nome_mes: reserva.checkInDate ? new Date(reserva.checkInDate).toLocaleString('default', { month: 'long' }) : '',
     data_ano: reserva.checkInDate ? new Date(reserva.checkInDate).getFullYear() : 0,
+    dia_chegada:reserva.checkInDate, 
+    dia_saida:reserva.checkOutDate, 
+    numero_noites: diasEntreDatas, 
+    DDD: clienteData.phones? clienteData.phones[0].iso.replace('+', '') : '',
+    hospedes:reserva.guests, 
     id_agente: reserva.agent?._id || '',
     nome_agente: reserva.agent?.name || '',
     canais: reserva.partner?.name || '',
@@ -170,22 +198,20 @@ async function fetchAndProcessData() {
   try {
     let skip = 0;
     const limit = 100;
-    const maxItems = 100;
+    const maxItems = -1;
     let processedItems = 0;
 
     const today = new Date().toISOString().split('T')[0] || '';
-
-    const date = new Date(today); // Converte a string para um objeto Date
-
+    const date = new Date(today);
     date.setFullYear(date.getFullYear() + 1); // Adiciona um ano à data
-    
-    const nextYearDate = date.toISOString().split('T')[0]|| ''; // Formata como string YYYY-MM-DD
+    const nextYearDate = date.toISOString().split('T')[0] || ''; // Data formatada YYYY-MM-DD
 
     const yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1); // Data de ontem
     const yesterday = yesterdayDate.toISOString().split('T')[0] || '';
 
-    while (processedItems > -1) {
+    // Loop até que todos os dados tenham sido processados ou o limite seja atingido
+    while (processedItems > maxItems) {
       console.log(`Buscando dados de reservas de ${yesterday} até ${today} com skip ${skip} e limit ${limit}`);
 
       const reservasData = await fetchDataReservas({
@@ -195,27 +221,33 @@ async function fetchAndProcessData() {
         limit,
       });
 
+      // Verifica se há dados para processar
       if (reservasData.length === 0) {
         console.log('Nenhum dado de reservas encontrado ou todos os dados foram processados. Finalizando.');
         break;
       }
 
+      // Processa as reservas
       const listagemPromises = reservasData.map(async (reserva: any) => {
         try {
           const idListing = reserva._idlisting;
-          if (!idListing) {
-            return null;
-          }
+          if (!idListing) return null;
+
+          const idClient = reserva._idclient; 
+          if (!idClient) return null;
+
+          console.log(`Buscando dados do cliente ${idClient}`);
+          const clienteData = await fetchDataUsingClientID({ id_client: idClient });
 
           console.log(`Buscando dados da listagem para idListing ${idListing}`);
           const listagemData = await fetchDataUsingListingId({ idListing });
 
           if (listagemData._idproperty) {
-            console.log(`Buscando dados da idPropriedade ${listagemData._idproperty}`);
+            console.log(`Buscando dados da propriedade ${listagemData._idproperty}`);
             const propriedadeData = await fetchDataUsingPropriedadeId({ idPropriedade: listagemData._idproperty });
 
             // Processa os dados da reserva, listagem e propriedade
-            processReservationData({ reserva, listagemData, propriedadeData });
+            processReservationData({ reserva, listagemData, propriedadeData, clienteData});
           }
 
           return listagemData;
@@ -227,20 +259,17 @@ async function fetchAndProcessData() {
 
       await Promise.all(listagemPromises);
 
-      processedItems += reservasData.length;
-      skip += limit;
+      processedItems += reservasData.length; // Incrementa o número de itens processados
+      skip += limit; // Atualiza o skip para a próxima iteração
     }
-    
+
     console.log('Processamento finalizado.');
-    
-   
   } catch (error) {
     console.error('Erro durante o processamento de dados:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
-
 
 fetchAndProcessData().catch((error) => {
   console.error('Erro não tratado na execução da função principal:', error);

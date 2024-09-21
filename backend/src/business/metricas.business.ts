@@ -18,12 +18,16 @@ export const createMetricas = async (data: {
   receita_com_taxas: number;
   taxas: number; 
   comissao: number; 
-  reservas: number;
   nota: number;
   data_dia: number;
   data_mes: number;
   nome_mes: string;
   data_ano: number;
+  dia_chegada: string;
+  dia_saida: string;
+  numero_noites: number;
+  DDD: string;
+  hospedes: number;
   id_agente: string;
   nome_agente: string;
   canais: string;
@@ -34,7 +38,7 @@ export const createMetricas = async (data: {
   estado: string;
   cidade: string;
   regiao: string;
-  rua_numero: string; // Corrigido para "rua_numero" em vez de "rua / numero"
+  rua_numero: string;
   imovel: string;
 }) => {
   return await prisma.metricas.create({
@@ -45,14 +49,18 @@ export const createMetricas = async (data: {
 export const updateMetricas = async (id: string, data: {
   ticket_diaria?: number;
   receita_com_taxas?: number;
-  reservas?: number;
-  nota?: number;
-  taxas?: number;  
+  taxas?: number;
   comissao?: number; 
+  nota?: number;
   data_dia?: number;
   data_mes?: number;
   nome_mes?: string;
   data_ano?: number;
+  dia_chegada?: string;
+  dia_saida?: string;
+  numero_noites?: number;
+  DDD?: string;
+  hospedes?: number;
   id_agente?: string;
   nome_agente?: string;
   canais?: string;
@@ -79,6 +87,6 @@ export const deleteMetricas = async (id: string) => {
     });
     return true;
   } catch (error) {
-    return false; // Return false if the deletion failed (e.g., if the ID does not exist)
+    return false; // Retorna false se a exclusão falhar (por exemplo, se o ID não existir)
   }
 };
