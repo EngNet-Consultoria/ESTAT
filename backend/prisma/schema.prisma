@@ -1,15 +1,17 @@
-// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
+
 
 model Metricas {
+
+
   id                   String   @id
   ticket_diaria        Float
   receita_com_taxas    Float
@@ -20,6 +22,11 @@ model Metricas {
   data_mes             Int
   nome_mes             String
   data_ano             Int
+  dia_chegada          String
+  dia_saida            String
+  numero_noites        Int
+  DDD                  String
+  hospedes             Int
   id_agente            String
   nome_agente          String
   canais               String
@@ -33,4 +40,3 @@ model Metricas {
   rua_numero           String
   imovel               String
 }
-
