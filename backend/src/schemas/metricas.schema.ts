@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { number, z } from "zod";
 
 // Schemas
 export const MetricasSchema = z.object({
@@ -6,6 +6,9 @@ export const MetricasSchema = z.object({
   ticket_diaria: z.number(),                   // Valor da diária por imóvel
   receita_com_taxas: z.number(),               // Receita total incluindo taxas
   taxas: z.number(), 
+  taxa_de_limpeza: z.number(),
+  taxa_enxoval: z.number(), 
+  taxa_parcelamento: z.number(), 
   comissao: z.number(), 
   nota: z.number().min(-1).max(10),            // Nota (avaliação) de -1 a 10
   data_dia: z.number().int().min(1).max(31),   // Dia da reserva (1 a 31)
