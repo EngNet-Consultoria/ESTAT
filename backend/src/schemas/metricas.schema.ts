@@ -9,6 +9,7 @@ export const MetricasSchema = z.object({
   taxa_de_limpeza: z.number(),
   taxa_enxoval: z.number(), 
   taxa_parcelamento: z.number(), 
+  taxa_cafe: z.number(),
   comissao: z.number(), 
   nota: z.number().min(-1).max(10),            // Nota (avaliação) de -1 a 10
   data_dia: z.number().int().min(1).max(31),   // Dia da reserva (1 a 31)

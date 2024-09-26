@@ -13,6 +13,7 @@ CREATE TABLE METRICAS (
     taxa_de_limpeza DECIMAL(10, 2),
     taxa_enxoval DECIMAL(10, 2),
     taxa_parcelamento DECIMAL(10, 2),
+    taxa_cafe DECIMAL(10, 2),
     comissao DECIMAL(10, 2),
     nota DECIMAL(3, 2),
     data_dia INT,

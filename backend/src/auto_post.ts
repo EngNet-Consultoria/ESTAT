@@ -159,10 +159,38 @@ if (propriedadeData.address && propriedadeData.address.street) {
   }
 }
 
-// Supondo que fees é um array de objetos com name e _f_val
-const taxaDeLimpeza = reservaDetalhes.price.extrasDetails?.fees?.find((fees: { name: string; _f_val: number }) => fees.name === "Taxa de Limpeza")?._f_val ||-1;
-const taxaDeEnxoval = reservaDetalhes.price.extrasDetails?.fees?.find((fees: { name: string; _f_val: number }) => fees.name === "Enxoval")?._f_val || -1;
-const taxaDeParcelamento = reservaDetalhes.price.extrasDetails?.fees?.find((fees: { name: string; _f_val: number }) => fees.name === "Taxa de Parcelamento")?._f_val|| -1;
+
+
+const taxaDeLimpeza = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(taxa\s*de\s*limpeza|taxa\s*limpeza|limpeza)\b/i.test(fees.name)
+)?._f_val || -1;
+
+const taxaDeEnxoval = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(enxoval|taxa\s*de\s*roupa\s*de\s*cama|roupa\s*de\s*cama|taxa\s*enxoval)\b/i.test(fees.name)
+)?._f_val || -1;
+
+const taxaDeParcelamento = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(taxa\s*de\s*parcelamento|taxa\s*parcelamento|taxa\s*de\s*serviço\s*\(\d+%\)|taxa\s*de\s*serviço)\b/i.test(fees.name)
+)?._f_val || -1;
+
+const taxaDeCafeDaManha = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(\w*\s*)*(taxa\s*de\s*café\s*da\s*manhã|café\s*da\s*manhã)(\s*\w*)*\b/i.test(fees.name)
+)?._f_val || -1;
+
+
+
+
+/* taxa de limpeza = "taxa de limpeza" "Taxa de limpeza" "Taxa de Limpeza"
+taxa de enxoval = "Enxoval""Taxa de roupa de cama"
+taxadeParcelamento = "Taxa de Parcelamento" "Taxa de Serviço (6%)"
+taxa de cafe da manha = "Taxa de Cafe da manha"
+*/
+
+
 
 
   const processedData: Metricas = {
@@ -173,6 +201,7 @@ const taxaDeParcelamento = reservaDetalhes.price.extrasDetails?.fees?.find((fees
     taxa_de_limpeza: taxaDeLimpeza, 
     taxa_enxoval: taxaDeEnxoval, 
     taxa_parcelamento : taxaDeParcelamento, 
+    taxa_cafe: taxaDeCafeDaManha, 
     comissao: reserva.partner?.commission?._mcval?.BRL||0,
     nota: -1,
     data_dia: reserva.checkInDate ? new Date(reserva.checkInDate).getUTCDate() : 0,
