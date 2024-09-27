@@ -12,6 +12,7 @@ const AUTH_HEADER = 'Basic ZDE1YjBkYWM6ZTA2NjgyODY=';
 const API_LISTAGEM = 'https://cta.stays.com.br/external/v1/content/listings';
 const API_PROPRIETARIO = 'https://cta.stays.com.br/external/v1/content/properties';
 const API_CLIENT = "https://cta.stays.com.br/external/v1/booking/clients"; 
+const API_RESERVATION = "https://cta.stays.com.br/external/v1/booking/reservations/"; 
 
 interface FetchDataReservasParams {
   fromDate: string;
@@ -106,15 +107,35 @@ async function fetchDataUsingClientID({ id_client }: FetchDataUsingClientParams)
   }
 }
 
+interface FetchDataUsingReservationIdParams {
+  idReserva: string;
+}
+
+async function fetchDataUsingReservationId({ idReserva }: FetchDataUsingReservationIdParams) {
+  try {
+    const response = await axios.get(`${API_RESERVATION}${idReserva}`, {
+      headers: {
+        accept: 'application/json',
+        Authorization: AUTH_HEADER,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao buscar dados da reserva com ID ${idReserva}:`, error.response?.data || error.message);
+    throw error;
+  }
+}
+
 
 interface ProcessReservationDataParams {
   reserva: any;
   listagemData: any;
   propriedadeData: any;
   clienteData: any; 
+  reservaDetalhes: any
 }
 
-function processReservationData({ reserva, listagemData, propriedadeData, clienteData}: ProcessReservationDataParams) {
+function processReservationData({ reserva, listagemData, propriedadeData, clienteData, reservaDetalhes}: ProcessReservationDataParams) {
   if (!reserva || !listagemData || !propriedadeData) {
     console.error('Dados da reserva, listagem ou propriedade estão indefinidos.');
     return;
@@ -140,19 +161,54 @@ if (propriedadeData.address && propriedadeData.address.street) {
 
 
 
+const taxaDeLimpeza = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(taxa\s*de\s*limpeza|taxa\s*limpeza|limpeza)\b/i.test(fees.name)
+)?._f_val || -1;
+
+const taxaDeEnxoval = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(enxoval|taxa\s*de\s*roupa\s*de\s*cama|roupa\s*de\s*cama|taxa\s*enxoval)\b/i.test(fees.name)
+)?._f_val || -1;
+
+const taxaDeParcelamento = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(taxa\s*de\s*parcelamento|taxa\s*parcelamento|taxa\s*de\s*serviço\s*\(\d+%\)|taxa\s*de\s*serviço)\b/i.test(fees.name)
+)?._f_val || -1;
+
+const taxaDeCafeDaManha = reservaDetalhes.price.extrasDetails?.fees?.find(
+  (fees: { name: string; _f_val: number }) =>
+    /\b(\w*\s*)*(taxa\s*de\s*café\s*da\s*manhã|café\s*da\s*manhã)(\s*\w*)*\b/i.test(fees.name)
+)?._f_val || -1;
+
+
+
+
+/* taxa de limpeza = "taxa de limpeza" "Taxa de limpeza" "Taxa de Limpeza"
+taxa de enxoval = "Enxoval""Taxa de roupa de cama"
+taxadeParcelamento = "Taxa de Parcelamento" "Taxa de Serviço (6%)"
+taxa de cafe da manha = "Taxa de Cafe da manha"
+*/
+
+
+
 
   const processedData: Metricas = {
     id: reserva.id || '',
     ticket_diaria: ticketDiario || 0,
     receita_com_taxas: reserva.price?._f_total,
     taxas: taxas, 
+    taxa_de_limpeza: taxaDeLimpeza, 
+    taxa_enxoval: taxaDeEnxoval, 
+    taxa_parcelamento : taxaDeParcelamento, 
+    taxa_cafe: taxaDeCafeDaManha, 
     comissao: reserva.partner?.commission?._mcval?.BRL||0,
     nota: -1,
-    data_dia: reserva.checkInDate ? new Date(reserva.checkInDate).getDate() : 0,
-    data_mes: reserva.checkInDate ? new Date(reserva.checkInDate).getMonth() + 1 : 0,
-    nome_mes: reserva.checkInDate ? new Date(reserva.checkInDate).toLocaleString('default', { month: 'long' }) : '',
-    data_ano: reserva.checkInDate ? new Date(reserva.checkInDate).getFullYear() : 0,
-    dia_chegada:reserva.checkInDate, 
+    data_dia: reserva.checkInDate ? new Date(reserva.checkInDate).getUTCDate() : 0,
+    data_mes: reserva.checkInDate ? new Date(reserva.checkInDate).getUTCMonth() + 1 : 0, // Lembrando que getUTCMonth retorna de 0 a 11
+    nome_mes: reserva.checkInDate ? new Date(reserva.checkInDate).toLocaleString('default', { month: 'long', timeZone: 'UTC' }) : '',
+    data_ano: reserva.checkInDate ? new Date(reserva.checkInDate).getUTCFullYear() : 0,
+    dia_chegada: reserva.checkInDate,
     dia_saida:reserva.checkOutDate, 
     numero_noites: diasEntreDatas, 
     DDD: clienteData.phones? clienteData.phones[0].iso.replace('+', '') : '',
@@ -232,24 +288,30 @@ async function fetchAndProcessData() {
         try {
           const idListing = reserva._idlisting;
           if (!idListing) return null;
-
+      
           const idClient = reserva._idclient; 
           if (!idClient) return null;
-
+      
+          const idReserva = reserva._id; 
+          if(!idReserva) return null; 
+      
+          console.log(`Buscando detalhes da reserva ${idReserva}`);
+          const reservaDetalhes = await fetchDataUsingReservationId({ idReserva });
+      
           console.log(`Buscando dados do cliente ${idClient}`);
           const clienteData = await fetchDataUsingClientID({ id_client: idClient });
-
+      
           console.log(`Buscando dados da listagem para idListing ${idListing}`);
           const listagemData = await fetchDataUsingListingId({ idListing });
-
+      
           if (listagemData._idproperty) {
             console.log(`Buscando dados da propriedade ${listagemData._idproperty}`);
             const propriedadeData = await fetchDataUsingPropriedadeId({ idPropriedade: listagemData._idproperty });
-
-            // Processa os dados da reserva, listagem e propriedade
-            processReservationData({ reserva, listagemData, propriedadeData, clienteData});
+      
+            // Processa os dados da reserva, detalhes da reserva, listagem e propriedade
+            processReservationData({ reserva: reservaDetalhes, listagemData, propriedadeData, clienteData , reservaDetalhes});
           }
-
+      
           return listagemData;
         } catch (error) {
           console.error('Erro ao processar reserva:', error);

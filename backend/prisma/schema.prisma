@@ -16,6 +16,10 @@ model Metricas {
   ticket_diaria        Float
   receita_com_taxas    Float
   taxas                Float
+  taxa_de_limpeza      Float
+  taxa_enxoval         Float
+  taxa_parcelamento    Float
+  taxa_cafe            Float
   comissao             Float
   nota                 Float
   data_dia             Int
