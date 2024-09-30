@@ -146,7 +146,7 @@ function processReservationData({ reserva, listagemData, propriedadeData, client
   const ticketDiario = diasEntreDatas > 0 ? Math.floor(total / diasEntreDatas) : 0;
 
   const espected = reserva.price?._f_expected || 0; 
-  const taxas = Math.floor(total - espected); 
+  const taxas = reserva.price.extrasDetails?._f_total || 0; 
 
   var rua_numero = ''; 
 
@@ -164,22 +164,22 @@ if (propriedadeData.address && propriedadeData.address.street) {
 const taxaDeLimpeza = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
     /taxa\s*de\s*limpeza|limpeza/i.test(fees.name)
-)?._f_val || -1;
+)?._f_val || 0;
 
 const taxaDeEnxoval = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
     /enxoval|roupa\s*de\s*cama/i.test(fees.name)
-)?._f_val || -1;
+)?._f_val || 0;
 
 const taxaDeParcelamento = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
     /taxa\s*de\s*parcelamento|serviço/i.test(fees.name)
-)?._f_val || -1;
+)?._f_val || 0;
 
 const taxaDeCafeDaManha = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
     /café\s*da\s*manhã/i.test(fees.name)
-)?._f_val || -1;
+)?._f_val || 0;
 
 
 
