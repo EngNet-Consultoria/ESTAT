@@ -163,23 +163,25 @@ if (propriedadeData.address && propriedadeData.address.street) {
 
 const taxaDeLimpeza = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
-    /\b(taxa\s*de\s*limpeza|taxa\s*limpeza|limpeza)\b/i.test(fees.name)
+    /taxa\s*de\s*limpeza|limpeza/i.test(fees.name)
 )?._f_val || -1;
 
 const taxaDeEnxoval = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
-    /\b(enxoval|taxa\s*de\s*roupa\s*de\s*cama|roupa\s*de\s*cama|taxa\s*enxoval)\b/i.test(fees.name)
+    /enxoval|roupa\s*de\s*cama/i.test(fees.name)
 )?._f_val || -1;
 
 const taxaDeParcelamento = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
-    /\b(taxa\s*de\s*parcelamento|taxa\s*parcelamento|taxa\s*de\s*serviço\s*\(\d+%\)|taxa\s*de\s*serviço)\b/i.test(fees.name)
+    /taxa\s*de\s*parcelamento|serviço/i.test(fees.name)
 )?._f_val || -1;
 
 const taxaDeCafeDaManha = reservaDetalhes.price.extrasDetails?.fees?.find(
   (fees: { name: string; _f_val: number }) =>
-    /\b(\w*\s*)*(taxa\s*de\s*café\s*da\s*manhã|café\s*da\s*manhã)(\s*\w*)*\b/i.test(fees.name)
+    /café\s*da\s*manhã/i.test(fees.name)
 )?._f_val || -1;
+
+
 
 
 
@@ -254,20 +256,18 @@ async function fetchAndProcessData() {
   try {
     let skip = 0;
     const limit = 100;
-    const maxItems = -1;
+    const maxItems = -1; // Ajustar este valor conforme necessário
     let processedItems = 0;
 
     const today = new Date().toISOString().split('T')[0] || '';
     const date = new Date(today);
-    date.setFullYear(date.getFullYear() + 1); // Adiciona um ano à data
-    const nextYearDate = date.toISOString().split('T')[0] || ''; // Data formatada YYYY-MM-DD
-
+    date.setFullYear(date.getFullYear() + 1);
+    const nextYearDate = date.toISOString().split('T')[0] || '';
     const yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1); // Data de ontem
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
     const yesterday = yesterdayDate.toISOString().split('T')[0] || '';
 
-    // Loop até que todos os dados tenham sido processados ou o limite seja atingido
-    while (processedItems > maxItems) {
+    while (processedItems > -1) { // Modifique a condição para processar um número máximo de registros
       console.log(`Buscando dados de reservas de ${yesterday} até ${today} com skip ${skip} e limit ${limit}`);
 
       const reservasData = await fetchDataReservas({
@@ -277,41 +277,39 @@ async function fetchAndProcessData() {
         limit,
       });
 
-      // Verifica se há dados para processar
       if (reservasData.length === 0) {
         console.log('Nenhum dado de reservas encontrado ou todos os dados foram processados. Finalizando.');
         break;
       }
 
-      // Processa as reservas
       const listagemPromises = reservasData.map(async (reserva: any) => {
         try {
           const idListing = reserva._idlisting;
           if (!idListing) return null;
-      
+
           const idClient = reserva._idclient; 
           if (!idClient) return null;
-      
+
           const idReserva = reserva._id; 
-          if(!idReserva) return null; 
-      
+          if (!idReserva) return null;
+
           console.log(`Buscando detalhes da reserva ${idReserva}`);
           const reservaDetalhes = await fetchDataUsingReservationId({ idReserva });
-      
+
           console.log(`Buscando dados do cliente ${idClient}`);
           const clienteData = await fetchDataUsingClientID({ id_client: idClient });
-      
+
           console.log(`Buscando dados da listagem para idListing ${idListing}`);
           const listagemData = await fetchDataUsingListingId({ idListing });
-      
+
           if (listagemData._idproperty) {
             console.log(`Buscando dados da propriedade ${listagemData._idproperty}`);
             const propriedadeData = await fetchDataUsingPropriedadeId({ idPropriedade: listagemData._idproperty });
-      
-            // Processa os dados da reserva, detalhes da reserva, listagem e propriedade
-            processReservationData({ reserva: reservaDetalhes, listagemData, propriedadeData, clienteData , reservaDetalhes});
+
+            // Processa os dados
+            processReservationData({ reserva: reservaDetalhes, listagemData, propriedadeData, clienteData, reservaDetalhes });
           }
-      
+
           return listagemData;
         } catch (error) {
           console.error('Erro ao processar reserva:', error);
@@ -320,9 +318,13 @@ async function fetchAndProcessData() {
       });
 
       await Promise.all(listagemPromises);
+      
+      // Desconecta e reconecta ao Prisma para liberar memória
+      await prisma.$disconnect();
+      await prisma.$connect();
 
-      processedItems += reservasData.length; // Incrementa o número de itens processados
-      skip += limit; // Atualiza o skip para a próxima iteração
+      processedItems += reservasData.length;
+      skip += limit;
     }
 
     console.log('Processamento finalizado.');
@@ -332,6 +334,7 @@ async function fetchAndProcessData() {
     await prisma.$disconnect();
   }
 }
+
 
 fetchAndProcessData().catch((error) => {
   console.error('Erro não tratado na execução da função principal:', error);
