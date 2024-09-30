@@ -146,7 +146,7 @@ function processReservationData({ reserva, listagemData, propriedadeData, client
   const ticketDiario = diasEntreDatas > 0 ? Math.floor(total / diasEntreDatas) : 0;
 
   const espected = reserva.price?._f_expected || 0; 
-  const taxas = reserva.extrasDetails?._f_total; 
+  const taxas = reserva.price.extrasDetails?._f_total || 0; 
 
   var rua_numero = ''; 
 
