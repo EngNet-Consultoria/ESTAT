@@ -36,5 +36,6 @@ CREATE TABLE METRICAS (
     cidade varchar(255),
     regiao VARCHAR(255),
     rua_numero varchar(255),
-    imovel VARCHAR(255)
+    imovel VARCHAR(255),
+    status VARCHAR(50)
 );

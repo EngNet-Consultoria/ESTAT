@@ -43,4 +43,5 @@ model Metricas {
   regiao               String
   rua_numero           String
   imovel               String
+  status               String
 }
