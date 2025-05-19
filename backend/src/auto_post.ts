@@ -338,16 +338,9 @@ async function fetchAndProcessData() {
     }
 }
 
-
-fetchAndProcessData().catch((error) => {
-    console.error('Erro não tratado na execução da função principal:', error);
-
-})
-
-
-/*setInterval(() => {
+setInterval(() => {
   console.log('Executando fetchAndProcessData no intervalo de 1 minutos...');
   fetchAndProcessData().catch((error) => {
     console.error('Erro não tratado na execução da função principal:', error);
   });
-}, 60000);*/
+}, 14400000);
