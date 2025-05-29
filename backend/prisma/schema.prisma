@@ -13,6 +13,7 @@ model Metricas {
 
 
   id                   String   @id
+  id_stays             String?          
   ticket_diaria        Float
   receita_com_taxas    Float
   taxas                Float
@@ -45,3 +46,5 @@ model Metricas {
   imovel               String
   status               String
 }
+
+
