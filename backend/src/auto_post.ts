@@ -5,6 +5,11 @@ import { number } from 'zod';
 import { skipPartiallyEmittedExpressions } from 'typescript';
 import { max, nextSunday } from 'date-fns';
 import { NUMBER } from 'sequelize';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Garante que o arquivo .env seja carregado mesmo em produção
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 
 const prisma = new PrismaClient();
