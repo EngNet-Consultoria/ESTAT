@@ -204,6 +204,7 @@ function processReservationData({ reserva, listagemData, propriedadeData, client
 
     const processedData: Metricas = {
         id: reserva.id || '',
+        id_stays: reserva._id || '',
         ticket_diaria: ticketDiario || 0,
         receita_com_taxas: reserva.price?._f_total,
         taxas: taxas,
