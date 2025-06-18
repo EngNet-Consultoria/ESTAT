@@ -24,6 +24,7 @@ app.post("/webhook", async (req, res) => {
         where: { id_stays }
       });
 
+      
       if (!reserva) {
         console.log(`ℹ️ Nenhuma reserva com id_stays = ${id_stays} encontrada.`);
       } else {
