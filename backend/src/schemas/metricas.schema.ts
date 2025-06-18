@@ -2,7 +2,8 @@ import { number, z } from "zod";
 
 // Schemas
 export const MetricasSchema = z.object({
-    id: z.string().max(50),                      // ID da reserva                     
+    id: z.string().max(50),                      // ID da reserva
+    id_stays: z.string().max(50),                // ID do stay                     
     ticket_diaria: z.number(),                   // Valor da diária por imóvel
     receita_com_taxas: z.number(),               // Receita total incluindo taxas
     taxas: z.number(),
