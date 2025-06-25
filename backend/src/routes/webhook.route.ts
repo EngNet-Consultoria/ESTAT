@@ -8,8 +8,8 @@ router.post("/", async (req, res) => {
   const { action, payload, _dt } = req.body;
 
   if (!payload) {
-    console.warn("⚠️ Webhook recebido sem payload.");
-    return res.status(400).json({ error: "Payload ausente." });
+    console.log("🧪 Webhook de teste recebido.");
+    return res.status(200).json({ status: "ok (teste sem payload)" });
   }
 
   const id_stays = payload?._id;
