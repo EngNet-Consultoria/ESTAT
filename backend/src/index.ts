@@ -13,6 +13,10 @@ import { handleCommonError } from "./middlewares/handleCommonError.middleware";
 import metricas from "./routes/metricas.route";
 import notas from "./routes/notas.route"
 
+
+import webhook from "./routes/webhook.route";
+
+
 dotenv.config();
 
 const app = express();
@@ -24,6 +28,10 @@ app.use(helmet());
 // Include your routes here
 app.use("/metricas", metricas);
 app.use("/nota", notas);
+
+app.use("/webhook", webhook);
+
+
 
 app.use(handleZodError);
 app.use(handlePrismaError);
