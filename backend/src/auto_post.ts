@@ -277,10 +277,10 @@ async function fetchAndProcessData() {
         const yesterday = yesterdayDate.toISOString().split('T')[0] || '';
 
         while (processedItems > -1) { // Modifique a condição para processar um número máximo de registros
-            console.log(`Buscando dados de reservas de ${yesterday} até ${today} com skip ${skip} e limit ${limit}`);
+            console.log(`Buscando dados de reservas de ${yesterday} até ${nextYearDate} com skip ${skip} e limit ${limit}`);
 
             const reservasData = await fetchDataReservas({
-                fromDate: "2017-01-01",
+                fromDate: yesterday,
                 toDate: nextYearDate,
                 skip,
                 limit,
@@ -345,15 +345,14 @@ async function fetchAndProcessData() {
 }
 
 
-fetchAndProcessData().catch((error) => {
+/*fetchAndProcessData().catch((error) => {
     console.error('Erro não tratado na execução da função principal:', error);
 
-})
+})*/
 
-
-/*setInterval(() => {
+setInterval(() => {
   console.log('Executando fetchAndProcessData no intervalo de 1 minutos...');
   fetchAndProcessData().catch((error) => {
     console.error('Erro não tratado na execução da função principal:', error);
   });
-}, 60000);*/
+}, 60000);
