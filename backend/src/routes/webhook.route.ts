@@ -3,11 +3,14 @@ import { prisma } from "../prisma";
 
 const router = Router();
 
+// Função auxiliar para gerar timestamp
+const timestamp = () => new Date().toISOString();
+
 router.post("/", async (req, res) => {
   const { action, payload } = req.body;
 
   if (!payload) {
-    console.log("🧪 Webhook de teste recebido.");
+    console.log(`${timestamp()} 🧪 Webhook de teste recebido.`);
     return res.status(200).json({ status: "ok (teste sem payload)" });
   }
 
@@ -16,13 +19,13 @@ router.post("/", async (req, res) => {
   const acoesPermitidas = ["reservation.canceled", "reservation.deleted"];
 
   if (id_stays && acoesPermitidas.includes(action)) {
-    console.log(`📥 Webhook recebido: action = ${action}, id_stays = ${id_stays}, localizador = ${id}`);
+    console.log(`${timestamp()} 📥 Webhook recebido: action = ${action}, id_stays = ${id_stays}, localizador = ${id}`);
 
     try {
       const reserva = await prisma.metricas.findFirst({ where: { id_stays } });
 
       if (!reserva) {
-        console.log(`ℹ️ Nenhuma reserva encontrada com id_stays = ${id_stays}, localizador = ${id}.`);
+        console.log(`${timestamp()} ℹ️ Nenhuma reserva encontrada com id_stays = ${id_stays}, localizador = ${id}.`);
       } else {
         const novoStatus = action === "reservation.canceled" ? "cancelado" : "deletado";
 
@@ -31,10 +34,10 @@ router.post("/", async (req, res) => {
           data: { status: novoStatus }
         });
 
-        console.log(`🔄 Reserva atualizada: id_stays = ${id_stays}, localizador = ${id}, id_banco = ${reserva.id}, novo status = "${novoStatus}".`);
+        console.log(`${timestamp()} 🔄 Reserva atualizada: id_stays = ${id_stays}, localizador = ${id}, id_banco = ${reserva.id}, novo status = "${novoStatus}".`);
       }
     } catch (error) {
-      console.error(`❌ Erro ao atualizar reserva: id_stays = ${id_stays}, localizador = ${id}`, error);
+      console.error(`${timestamp()} ❌ Erro ao atualizar reserva: id_stays = ${id_stays}, localizador = ${id}`, error);
       return res.status(500).json({ status: "erro", mensagem: "Erro ao atualizar status da reserva" });
     }
   }
