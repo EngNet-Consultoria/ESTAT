@@ -4,7 +4,11 @@ import { prisma } from "../prisma";
 const router = Router();
 
 // Função auxiliar para gerar timestamp
-const timestamp = () => new Date().toISOString();
+const timestamp = () =>
+  new Date().toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour12: false,
+  });
 
 router.post("/", async (req, res) => {
   const { action, payload } = req.body;
