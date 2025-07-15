@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { PrismaClient } from '@prisma/client';
 import { MetricasSchema, Metricas } from './schemas/metricas.schema';
 import { number } from 'zod';
@@ -10,6 +11,13 @@ import path from 'path';
 
 // Garante que o arquivo .env seja carregado mesmo em produção
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const axiosInstance = axios.create({ timeout: 10000 }); // timeout de 10s
+
+axiosRetry(axiosInstance, {
+  retries: 2, // tenta até 2 vezes extras
+  retryDelay: axiosRetry.exponentialDelay, // espera crescente entre tentativas
+});
 
 
 const prisma = new PrismaClient();
@@ -29,7 +37,7 @@ interface FetchDataReservasParams {
 async function fetchDataReservas({ fromDate, toDate, skip, limit }: FetchDataReservasParams) {
     const API_RESERVAS = `https://cta.stays.com.br/external/v1/booking/reservations?from=${fromDate}&to=${toDate}&dateType=arrival&skip=${skip}&limit=${limit}`;
     try {
-        const response = await axios.get(API_RESERVAS, {
+        const response = await axiosInstance.get(API_RESERVAS, {
             headers: {
                 accept: 'application/json',
                 Authorization: AUTH_HEADER,
@@ -48,7 +56,7 @@ interface FetchDataUsingListingIdParams {
 
 async function fetchDataUsingListingId({ idListing }: FetchDataUsingListingIdParams) {
     try {
-        const response = await axios.get(`${API_LISTAGEM}/${idListing}`, {
+        const response = await axiosInstance.get(`${API_LISTAGEM}/${idListing}`, {
             headers: {
                 accept: 'application/json',
                 Authorization: AUTH_HEADER,
@@ -67,7 +75,7 @@ interface FetchDataUsingPropriedadeIdParams {
 
 async function fetchDataUsingPropriedadeId({ idPropriedade }: FetchDataUsingPropriedadeIdParams) {
     try {
-        const response = await axios.get(`${API_PROPRIETARIO}/${idPropriedade}`, {
+        const response = await axiosInstance.get(`${API_PROPRIETARIO}/${idPropriedade}`, {
             headers: {
                 accept: 'application/json',
                 Authorization: AUTH_HEADER,
@@ -99,7 +107,7 @@ interface FetchDataUsingClientParams {
 
 async function fetchDataUsingClientID({ id_client }: FetchDataUsingClientParams) {
     try {
-        const response = await axios.get(`${API_CLIENT}/${id_client}`, {
+        const response = await axiosInstance.get(`${API_CLIENT}/${id_client}`, {
             headers: {
                 accept: 'application/json',
                 Authorization: AUTH_HEADER,
@@ -118,7 +126,7 @@ interface FetchDataUsingReservationIdParams {
 
 async function fetchDataUsingReservationId({ idReserva }: FetchDataUsingReservationIdParams) {
     try {
-        const response = await axios.get(`${API_RESERVATION}${idReserva}`, {
+        const response = await axiosInstance.get(`${API_RESERVATION}${idReserva}`, {
             headers: {
                 accept: 'application/json',
                 Authorization: AUTH_HEADER,
