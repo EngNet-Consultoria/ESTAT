@@ -207,7 +207,7 @@ function processReservationData({ reserva, listagemData, propriedadeData, client
     taxa de cafe da manha = "Taxa de Cafe da manha"
     */
 
-
+    const iso = clienteData?.phones?.[0]?.iso ?? null;
 
 
     const processedData: Metricas = {
@@ -229,7 +229,7 @@ function processReservationData({ reserva, listagemData, propriedadeData, client
         dia_chegada: reserva.checkInDate,
         dia_saida: reserva.checkOutDate,
         numero_noites: diasEntreDatas,
-        DDD: clienteData.phones ? clienteData.phones[0].iso.replace('+', '') : '',
+        DDD: iso ? iso.replace('+', '') : '',
         hospedes: reserva.guests,
         id_agente: reserva.agent?._id || '',
         nome_agente: reserva.agent?.name || '',
@@ -335,10 +335,6 @@ async function fetchAndProcessData() {
             });
 
             await Promise.all(listagemPromises);
-
-            // Desconecta e reconecta ao Prisma para liberar memória
-            await prisma.$disconnect();
-            await prisma.$connect();
 
             processedItems += reservasData.length;
             skip += limit;
