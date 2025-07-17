@@ -45,7 +45,11 @@ async function fetchDataReservas({ fromDate, toDate, skip, limit }: FetchDataRes
         });
         return response.data;
     } catch (error) {
-        console.error('Erro ao buscar dados da API de reservas:', error);
+        if (axios.isAxiosError(error)) {
+            console.error(`Erro Axios (${error.code}) ao buscar reservas:`, error.message);
+        } else {
+            console.error('Erro inesperado ao buscar reservas:', error);
+        }
         throw error;
     }
 }
@@ -64,10 +68,15 @@ async function fetchDataUsingListingId({ idListing }: FetchDataUsingListingIdPar
         });
         return response.data;
     } catch (error) {
-        console.error('Erro ao buscar dados da API de listagem:', error);
+        if (axios.isAxiosError(error)) {
+            console.error(`Erro Axios (${error.code}) ao buscar listagem ${idListing}:`, error.message);
+        } else {
+            console.error('Erro inesperado ao buscar dados da API de listagem:', error);
+        }
         throw error;
     }
 }
+
 
 interface FetchDataUsingPropriedadeIdParams {
     idPropriedade: string;
@@ -83,10 +92,15 @@ async function fetchDataUsingPropriedadeId({ idPropriedade }: FetchDataUsingProp
         });
         return response.data;
     } catch (error) {
-        console.error('Erro ao buscar dados da API do proprietário:', error);
+        if (axios.isAxiosError(error)) {
+            console.error(`Erro Axios (${error.code}) ao buscar propriedade ${idPropriedade}:`, error.message);
+        } else {
+            console.error('Erro inesperado ao buscar dados da API do proprietário:', error);
+        }
         throw error;
     }
 }
+
 
 function calcularDiasEntreDatas(data1: string, data2: string): number {
     const dataInicial = new Date(data1);
@@ -115,10 +129,15 @@ async function fetchDataUsingClientID({ id_client }: FetchDataUsingClientParams)
         });
         return response.data;
     } catch (error) {
-        console.error(`Erro ao buscar dados do cliente com ID ${id_client}:`, error.response?.data || error.message);
-        throw error; // Lança o erro para ser tratado onde a função é chamada
+        if (axios.isAxiosError(error)) {
+            console.error(`Erro Axios (${error.code}) ao buscar cliente ${id_client}:`, error.message);
+        } else {
+            console.error(`Erro inesperado ao buscar cliente ${id_client}:`, error);
+        }
+        throw error;
     }
 }
+
 
 interface FetchDataUsingReservationIdParams {
     idReserva: string;
@@ -134,10 +153,15 @@ async function fetchDataUsingReservationId({ idReserva }: FetchDataUsingReservat
         });
         return response.data;
     } catch (error) {
-        console.error(`Erro ao buscar dados da reserva com ID ${idReserva}:`, error.response?.data || error.message);
+        if (axios.isAxiosError(error)) {
+            console.error(`Erro Axios (${error.code}) ao buscar reserva ${idReserva}:`, error.message);
+        } else {
+            console.error(`Erro inesperado ao buscar reserva ${idReserva}:`, error);
+        }
         throw error;
     }
 }
+
 
 
 interface ProcessReservationDataParams {
@@ -249,7 +273,11 @@ function processReservationData({ reserva, listagemData, propriedadeData, client
     try {
         MetricasSchema.parse(processedData);
     } catch (validationError) {
-        console.error('Erro na validação dos dados:', validationError);
+        if (validationError instanceof Error) {
+            console.error('Erro de validação dos dados:', validationError.message);
+        } else {
+            console.error('Erro de validação inesperado:', validationError);
+        }
         return;
     }
 
@@ -264,7 +292,11 @@ async function storeDataInDatabase({ data }: { data: Metricas }) {
             create: data,
         });
     } catch (error) {
-        console.error('Erro ao armazenar dados no banco de dados:', error);
+        if (error instanceof Error) {
+            console.error(`Erro ao armazenar dados no banco (ID ${data.id}):`, error.message);
+        } else {
+            console.error(`Erro inesperado ao armazenar dados no banco (ID ${data.id}):`, error);
+        }
         throw error;
     }
 }
@@ -324,12 +356,23 @@ async function fetchAndProcessData() {
                         const propriedadeData = await fetchDataUsingPropriedadeId({ idPropriedade: listagemData._idproperty });
 
                         // Processa os dados
-                        processReservationData({ reserva: reservaDetalhes, listagemData, propriedadeData, clienteData, reservaDetalhes });
+                        processReservationData({
+                            reserva: reservaDetalhes,
+                            listagemData,
+                            propriedadeData,
+                            clienteData,
+                            reservaDetalhes
+                        });
                     }
 
                     return listagemData;
                 } catch (error) {
-                    console.error('Erro ao processar reserva:', error);
+                    const id = reserva?._id || 'desconhecido';
+                    if (error instanceof Error) {
+                        console.error(`Erro ao processar reserva ${id}:`, error.message);
+                    } else {
+                        console.error(`Erro inesperado ao processar reserva ${id}:`, error);
+                    }
                     return null;
                 }
             });
@@ -342,7 +385,11 @@ async function fetchAndProcessData() {
 
         console.log('Processamento finalizado.');
     } catch (error) {
-        console.error('Erro durante o processamento de dados:', error);
+        if (error instanceof Error) {
+            console.error('Erro durante o processamento de dados:', error.message);
+        } else {
+            console.error('Erro inesperado durante o processamento de dados:', error);
+        }
     } finally {
         await prisma.$disconnect();
     }
@@ -366,8 +413,12 @@ setInterval(async () => {
   try {
     await fetchAndProcessData();
   } catch (err) {
-    console.error("Erro na execução:", err);
+    if (err instanceof Error) {
+      console.error("Erro na execução:", err.message);
+    } else {
+      console.error("Erro inesperado na execução:", err);
+    }
   } finally {
     isRunning = false;
   }
-}, 14400000);
+}, 14400000); // 4 horas
