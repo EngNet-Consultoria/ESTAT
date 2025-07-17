@@ -421,4 +421,4 @@ setInterval(async () => {
   } finally {
     isRunning = false;
   }
-}, 14400000); // 4 horas
+}, 60000); // 1 minuto
