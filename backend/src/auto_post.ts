@@ -354,9 +354,20 @@ async function fetchAndProcessData() {
 
 })*/
 
-setInterval(() => {
-  console.log('Executando fetchAndProcessData no intervalo de 1 minutos...');
-  fetchAndProcessData().catch((error) => {
-    console.error('Erro não tratado na execução da função principal:', error);
-  });
+let isRunning = false;
+
+setInterval(async () => {
+  if (isRunning) {
+    console.log("A execução anterior ainda está em andamento. Ignorando esta chamada.");
+    return;
+  }
+
+  isRunning = true;
+  try {
+    await fetchAndProcessData();
+  } catch (err) {
+    console.error("Erro na execução:", err);
+  } finally {
+    isRunning = false;
+  }
 }, 60000);
