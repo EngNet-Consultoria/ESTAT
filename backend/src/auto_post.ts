@@ -12,10 +12,10 @@ import path from 'path';
 // Garante que o arquivo .env seja carregado mesmo em produção
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const axiosInstance = axios.create({ timeout: 10000 }); // timeout de 10s
+const axiosInstance = axios.create({ timeout: 30000 }); // timeout de 30s
 
 axiosRetry(axiosInstance, {
-  retries: 2, // tenta até 2 vezes extras
+  retries: 3, // tenta até 3 vezes extras
   retryDelay: axiosRetry.exponentialDelay, // espera crescente entre tentativas
 });
 
@@ -301,6 +301,8 @@ async function storeDataInDatabase({ data }: { data: Metricas }) {
     }
 }
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function fetchAndProcessData() {
     try {
         let skip = 0;
@@ -332,16 +334,16 @@ async function fetchAndProcessData() {
                 break;
             }
 
-            const listagemPromises = reservasData.map(async (reserva: any) => {
+            for (const reserva of reservasData) {
                 try {
                     const idListing = reserva._idlisting;
-                    if (!idListing) return null;
+                    if (!idListing) continue;
 
                     const idClient = reserva._idclient;
-                    if (!idClient) return null;
+                    if (!idClient) continue;
 
                     const idReserva = reserva._id;
-                    if (!idReserva) return null;
+                    if (!idReserva) continue;
 
                     console.log(`Buscando detalhes da reserva ${idReserva}`);
                     const reservaDetalhes = await fetchDataUsingReservationId({ idReserva });
@@ -353,32 +355,30 @@ async function fetchAndProcessData() {
                     const listagemData = await fetchDataUsingListingId({ idListing });
 
                     if (listagemData._idproperty) {
-                        console.log(`Buscando dados da propriedade ${listagemData._idproperty}`);
-                        const propriedadeData = await fetchDataUsingPropriedadeId({ idPropriedade: listagemData._idproperty });
+                    console.log(`Buscando dados da propriedade ${listagemData._idproperty}`);
+                    const propriedadeData = await fetchDataUsingPropriedadeId({ idPropriedade: listagemData._idproperty });
 
-                        // Processa os dados
-                        processReservationData({
-                            reserva: reservaDetalhes,
-                            listagemData,
-                            propriedadeData,
-                            clienteData,
-                            reservaDetalhes
-                        });
+                    // Processa os dados
+                    processReservationData({
+                        reserva: reservaDetalhes,
+                        listagemData,
+                        propriedadeData,
+                        clienteData,
+                        reservaDetalhes
+                    });
                     }
 
-                    return listagemData;
+                    await sleep(200); // Pausa de 200ms entre uma reserva e outra
+
                 } catch (error) {
                     const id = reserva?._id || 'desconhecido';
                     if (error instanceof Error) {
-                        console.error(`Erro ao processar reserva ${id}:`, error.message);
+                    console.error(`Erro ao processar reserva ${id}:`, error.message);
                     } else {
-                        console.error(`Erro inesperado ao processar reserva ${id}:`, error);
+                    console.error(`Erro inesperado ao processar reserva ${id}:`, error);
                     }
-                    return null;
                 }
-            });
-
-            await Promise.all(listagemPromises);
+                }
 
             processedItems += reservasData.length;
             skip += limit;
@@ -422,4 +422,4 @@ setInterval(async () => {
   } finally {
     isRunning = false;
   }
-}, 300000); // 5 minutos
+}, 60000); // 1 minuto
