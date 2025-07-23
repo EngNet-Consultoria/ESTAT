@@ -310,21 +310,22 @@ async function fetchAndProcessData() {
         const maxItems = -1; // Ajustar este valor conforme necessário
         let processedItems = 0;
 
-        // const today = new Date().toISOString().split('T')[0];
-        // const date = new Date(today);
-        // date.setFullYear(date.getFullYear() + 1);
-        // const nextYearDate = date.toISOString().split('T')[0];
-        // const yesterdayDate = new Date();
-        // yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-        // const yesterday = yesterdayDate.toISOString().split('T')[0];
+        const today = new Date();
+        const nextYear = new Date(today);
+        nextYear.setFullYear(today.getFullYear() + 1);
+
+        const oneWeekAgo = new Date(today);
+        oneWeekAgo.setDate(today.getDate() - 7);
+
+        const oneWeekAgoStr = oneWeekAgo.toISOString().split('T')[0] || '';
+        const nextYearStr = nextYear.toISOString().split('T')[0] || '';
 
         while (processedItems > -1) { // Modifique a condição para processar um número máximo de registros
-            console.log(`🔍 Buscando dados de reservas de 2025-07-01 até 2025-07-31 com skip ${skip} e limit ${limit}`);
-
+            console.log(`🔍 Buscando dados de reservas de ${oneWeekAgoStr} até ${nextYearStr} com skip ${skip} e limit ${limit}`);
 
             const reservasData = await fetchDataReservas({
-                fromDate: '2025-07-01',
-                toDate: '2025-07-31',
+                fromDate: oneWeekAgoStr,
+                toDate: nextYearStr,
                 skip,
                 limit,
             });
@@ -422,4 +423,4 @@ setInterval(async () => {
   } finally {
     isRunning = false;
   }
-}, 60000); // 1 minuto
+}, 300000); // 5 minutos
