@@ -3,7 +3,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const listMetricas = async () => {
-    return await prisma.metricas.findMany();
+    return await prisma.metricas.findMany({
+        where: {
+            status: {
+                in: ['booked', 'reserved', 'contract']
+            }
+        }
+    });
 };
 
 export const getMetricasById = async (id: string) => {
